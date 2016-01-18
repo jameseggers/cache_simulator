@@ -1,19 +1,22 @@
+import time
+
 class CacheLine(object):
     def __init__(self, L, setNumber):
         self.L = L
         self.words = [0,0,0,0]
         self.setNumber = setNumber
-        self.order = 0
+        self.last_access = time.time()
         self.initialized = False
 
     def is_in_line(self, address):
         for word in self.words:
             if (hex(address) == hex(word)):
+                self.accessed()
                 return True
         return False
 
     def addToLine(self, address, offset):
-        self.order += 1
+        self.accessed()
         self.initialized = True
 
         if offset is 0:
@@ -40,8 +43,11 @@ class CacheLine(object):
     def setNumber(self):
         return self.setNumber
 
-    def order(self):
-        return self.order
+    def last_access(self):
+        return self.last_access
+
+    def accessed(self):
+        self.last_access = time.time()
 
     def words(self):
         return self.words

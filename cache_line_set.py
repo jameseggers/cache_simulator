@@ -1,4 +1,5 @@
 from cache_line import *
+import time
 
 class CacheLineSet():
     def __init__(self, K, L, setId):
@@ -12,31 +13,38 @@ class CacheLineSet():
             self.tags.append("-")
 
     def isInSet(self, address, tag):
-        for line in self.lines:
+        for idx, line in enumerate(self.lines):
             if (tag in self.tags) and line.is_in_line(address):
                 return True
         return False
 
     def LRULine(self):
-        lowest_order = self.lines[0].order
-        lowest_index = 0
+        last_accessed_time = time.time()
+        last_accessed_index = 0
         for idx, line in enumerate(self.lines):
-            if line.order < lowest_order:
-                lowest_index = idx
-        return lowest_index
+            if (line.last_access < last_accessed_time) or (line.initialized is False):
+                last_accessed_index = idx
+                last_accessed_time = line.last_access
+        return last_accessed_index
 
     def addToSet(self, address, offset, tag):
         if (not self.isInSet(address, tag)):
             lowest_index = self.LRULine()
             self.lines[lowest_index].addToLine(address, offset)
             self.tags[lowest_index] = tag
-            # print 'Cache Line ' + str(self.setId) + '('
-            # for line in self.lines:
-            #     print '[' + hex(line.words[0])+ ',' + hex(line.words[1])+ ',' + hex(line.words[2])+ ',' + hex(line.words[3])+ ']'
-            # print ')'
+            print '-------------------'
+            print hex(address)
+            print 'Cache Line ' + str(self.setId) + '('
+            for line in self.lines:
+                print '[' + hex(line.words[0])+ ',' + hex(line.words[1])+ ',' + hex(line.words[2])+ ',' + hex(line.words[3])+ ']'
+            print ')'
             print "Miss"
+            return 0
         else:
+            print '-------------------'
+            print hex(address)
             print "Hit!"
+            return 1
 
     def tags(self):
         return self.tags
